@@ -6,7 +6,7 @@ Windows 桌面播放器联动与脚本控制工具。默认使用 PotPlayer，�
 
 ## 使用
 
-在本仓库 Releases 下载 `JXOPlayer-2.0-Setup.exe` 安装，或下载 `JXOPlayer-2.0-Portable.zip` 完整解压后运行。适用于 Windows 10/11 64 位，自带 .NET 运行环境、PotPlayer 与媒体时长读取组件。
+打开 **[版本下载页](https://github.com/JXAKL/JXOPlayer/releases/latest)**，在 Assets 中下载 `JXOPlayer-2.0-Setup.exe` 安装，或下载 `JXOPlayer-2.0-Portable.zip` 完整解压后运行。适用于 Windows 10/11 64 位，自带 .NET 运行环境、PotPlayer 与媒体时长读取组件。GitHub 自动生成的 Source code 是源码，不是可直接运行的软件包。
 
 发行包不携带媒体库、个人设备配置、播放历史或缓存。首次运行需要配置设备、轴范围和脚本/视频目录。音频不进入随机视频库，但支持手动播放匹配脚本。超长路径兼容播放期间需保持 JXOPlayer 运行。
 
