@@ -20,6 +20,7 @@
 
 # Runtime and distribution binaries are provided as Release assets
 /JXOPlayer/Runtime/
+/JXOPlayer/Source/Tools/WindowsSDK/
 /JXOPlayer/PotPlayer/
 /JXOPlayer/JXOPlayer.exe
 /JXOPlayer/Bin/*

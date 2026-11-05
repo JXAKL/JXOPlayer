@@ -1,8 +1,9 @@
+param([string]$Version='2.0.2')
 $ErrorActionPreference='Stop'
 $stage=(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'current-stage.txt') -Raw).Trim()
 $manifest=Get-Content -LiteralPath (Join-Path $stage 'payload-manifest.json') -Raw | ConvertFrom-Json
 $test=Join-Path $PSScriptRoot ('install-test-'+[guid]::NewGuid().ToString('N'))
-$setup=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\Releases\JXOPlayer-2.0-Setup.exe')).Path
+$setup=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\Releases\JXOPlayer-$Version-Setup.exe")).Path
 $report=Join-Path $PSScriptRoot 'installer-results.txt'
 '' | Set-Content -LiteralPath $report
 function Pass([string]$message){$message="PASS $message"; $message | Add-Content -LiteralPath $report; Write-Output $message}

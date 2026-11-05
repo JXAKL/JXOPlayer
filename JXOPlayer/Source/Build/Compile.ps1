@@ -5,6 +5,7 @@ Add-Type -AssemblyName Microsoft.CodeAnalysis.CSharp
 $basePath = if($ReferenceDirectory) { (Resolve-Path -LiteralPath $ReferenceDirectory).Path } else { (Resolve-Path (Join-Path $PSScriptRoot '..\..\Runtime')).Path }
 $refs = [System.Collections.Generic.List[Microsoft.CodeAnalysis.MetadataReference]]::new()
 foreach ($file in Get-ChildItem -LiteralPath $basePath -Filter '*.dll') {
+    if ([IO.Path]::GetFullPath($file.FullName) -eq [IO.Path]::GetFullPath($Output)) { continue }
     if ($file.Name -match '^(Test.*|StartupRegression|PlaybackIntegration)\.dll$') { continue }
     try {
         [System.Reflection.AssemblyName]::GetAssemblyName($file.FullName) | Out-Null

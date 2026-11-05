@@ -20,7 +20,7 @@ public static class CleanStartup
         Directory.SetCurrentDirectory(Path.GetDirectoryName(Environment.ProcessPath));
         report=Path.Combine(Environment.CurrentDirectory,"clean-startup.txt");File.WriteAllText(report,"");
         timer=new DispatcherTimer{Interval=TimeSpan.FromMilliseconds(200)};
-        timer.Tick+=(s,e)=>{
+        timer.Tick+=async (s,e)=>{
             try{
                 if((DateTime.UtcNow-start).TotalSeconds>30)throw new Exception("Clean startup timed out");
                 var main=Application.Current?.MainWindow;
@@ -40,6 +40,8 @@ public static class CleanStartup
                 Check(targets.All(t=>!(bool)Get(t,"AutoConnectEnabled")),"device automatic connections default off");
                 Check(targets.All(t=>Get(t,"Status").ToString()=="Disconnected"),"no device is connected");
                 Check(File.Exists("PotPlayer/PotPlayerMini64.exe") && File.Exists("Bin/mpv.exe"),"bundled playback and duration components exist");
+                timer.Stop();
+                if(Environment.GetCommandLineArgs().Contains("--connections"))await DeviceConnectionRegression.Run(targets,Check);
                 File.AppendAllText(report,"COMPLETE "+checks+" checks\n");timer.Stop();main.Close();
             }catch(Exception ex){timer.Stop();File.AppendAllText(report,"FAIL "+ex+"\n");Application.Current?.Shutdown(1);}
         };

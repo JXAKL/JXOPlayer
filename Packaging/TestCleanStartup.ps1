@@ -1,7 +1,13 @@
-param([Parameter(Mandatory)][string]$Payload)
+param([Parameter(Mandatory)][string]$Payload,[switch]$DeviceConnections)
 $ErrorActionPreference='Stop'
 $test=Join-Path $PSScriptRoot ('test-'+[guid]::NewGuid().ToString('N'))
 Copy-Item -LiteralPath $Payload -Destination $test -Recurse
+if($DeviceConnections){
+    $configPath=Join-Path $test 'JXOPlayer.config.json'
+    $config=Get-Content -LiteralPath $configPath -Raw|ConvertFrom-Json -AsHashtable
+    $config.LogLevel='Trace'
+    $config|ConvertTo-Json -Depth 100|Set-Content -LiteralPath $configPath -Encoding utf8NoBOM
+}
 $source=Join-Path $PSScriptRoot '..\JXOPlayer\Source'
 Add-Type -Path (Join-Path $source 'Tools\dnlib.dll')
 $assembly=Join-Path $test 'Runtime\JXOPlayer.dll'
@@ -15,7 +21,7 @@ try{
     $module.Write($assembly+'.test')
 }finally{$module.Dispose()}
 Move-Item -LiteralPath ($assembly+'.test') -Destination $assembly -Force
-& (Join-Path $source 'Build\Compile.ps1') -Source (Join-Path $PSScriptRoot 'CleanStartup.cs') -Output (Join-Path $test 'Runtime\CleanStartup.dll') -ReferenceDirectory (Join-Path $test 'Runtime') -Executable
+& (Join-Path $source 'Build\Compile.ps1') -Source @((Join-Path $PSScriptRoot 'CleanStartup.cs'),(Join-Path $source 'Tests\DeviceConnectionRegression.cs'),(Join-Path $source 'Tests\WindowsBluetoothRegression.cs')) -Output (Join-Path $test 'Runtime\CleanStartup.dll') -ReferenceDirectory (Join-Path $test 'Runtime') -Executable
 $bytes=[IO.File]::ReadAllBytes((Join-Path $test 'JXOPlayer.exe'))
 $binding="Runtime/JXOPlayer.dll`0"
 $offset=[Text.Encoding]::Latin1.GetString($bytes).IndexOf($binding,[StringComparison]::Ordinal)
@@ -25,7 +31,8 @@ for($i=$binding.Length;$i -lt $new.Length;$i++){if($bytes[$offset+$i] -ne 0){thr
 [Array]::Clear($bytes,$offset,$new.Length);[Array]::Copy($new,0,$bytes,$offset,$new.Length)
 [IO.File]::WriteAllBytes((Join-Path $test 'CleanStartup.exe'),$bytes)
 foreach($suffix in 'deps.json','runtimeconfig.json'){Copy-Item -LiteralPath (Join-Path $test "Runtime\JXOPlayer.$suffix") -Destination (Join-Path $test "Runtime\CleanStartup.$suffix")}
-$p=Start-Process -FilePath (Join-Path $test 'CleanStartup.exe') -WorkingDirectory $test -WindowStyle Hidden -PassThru
+$arguments=if($DeviceConnections){'--connections'}else{'--startup'}
+$p=Start-Process -FilePath (Join-Path $test 'CleanStartup.exe') -ArgumentList $arguments -WorkingDirectory $test -WindowStyle Hidden -PassThru
 if(!$p.WaitForExit(40000)){$p.Kill();throw 'Clean startup test timeout'}
 Get-Content -LiteralPath (Join-Path $test 'clean-startup.txt')
 Copy-Item -LiteralPath (Join-Path $test 'clean-startup.txt') -Destination (Join-Path $PSScriptRoot 'clean-startup-results.txt')

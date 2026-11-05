@@ -1,24 +1,27 @@
 #ifndef Payload
   #error Payload must be specified
 #endif
+#ifndef ReleaseVersion
+  #define ReleaseVersion "2.0.2"
+#endif
 [Setup]
 AppId={{E3E13C5B-B2E7-4D29-B85E-61B64CD8F990}
 AppName=JXOPlayer
-AppVersion=2.0
-AppVerName=JXOPlayer 2.0
+AppVersion={#ReleaseVersion}
+AppVerName=JXOPlayer {#ReleaseVersion}
 DefaultDirName={localappdata}\Programs\JXOPlayer
 DefaultGroupName=JXOPlayer 2.0
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-MinVersion=10.0
+MinVersion=10.0.19041
 DisableProgramGroupPage=yes
 DisableDirPage=no
 UsePreviousAppDir=yes
 UninstallDisplayIcon={app}\JXOPlayer.exe
 SetupIconFile={#Payload}\Runtime\JXOPlayer.ico
 OutputDir=..\Releases
-OutputBaseFilename=JXOPlayer-2.0-Setup
+OutputBaseFilename=JXOPlayer-{#ReleaseVersion}-Setup
 Compression=lzma2/normal
 SolidCompression=yes
 WizardStyle=modern

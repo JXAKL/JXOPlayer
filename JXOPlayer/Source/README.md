@@ -14,6 +14,7 @@
 - `RandomPlayback/PotPlayerBridge.cs`：通过原生媒体源管理器联动 PotPlayer，并确认所选脚本加载。
 - `RandomPlayback/RandomPlaybackService.cs`：异步扫描、设置与主窗口 / 悬浮窗五档按钮。
 - `Build`：生成运行插件、修改发行程序集、构建图标和原生程序资源。
+- `Connections/ConnectionCompatibility.cs`：手动串口/UDP 连接检查、蓝牙设备选择与依赖诊断。`Build/ApplyDeviceConnectionCompatibility.ps1` 将这些入口接入原生程序集，并更新运行依赖；可对当前改造版本重复执行。
 - `Tests`：算法、悬浮控制、连续启动、实际 PotPlayer 换片验证。
 - `Tests/BridgeRegression.cs`：脚本确认、轴锁等待、同片重播、取消及断开连接回归检查。
 - `Results`：最近一次测试结果与预览图。
@@ -44,6 +45,20 @@
 必须使用更新前备份中的原始发行文件作为输入，不能把改造后的程序集再次当作原始输入。目标目录需已有 `Runtime` 运行依赖以及对应的 `JXOPlayer.deps.json` / `JXOPlayer.runtimeconfig.json`。构建脚本更新名称、版本、图标、内嵌资源与界面，移除原帮助模块，并修正目录调整后的资源定位和插件编译逻辑。
 
 这些构建脚本针对当前发行文件，升级原始程序时需重新检查补丁匹配条件。
+
+### 设备连接修复（2.0.1 / 2.0.2）
+
+串口显示所有有效 COM 端口，手动连接不要求 CH340 名称或 `#isOSR` 私有应答。自动发现保留原识别及握手，并尊重自动连接开关。蓝牙列表不再按设备名称删减，手动连接和快捷重连保留用户选择；没有合适候选时展开列表。手动 UDP 检查地址并打开发送通道，不要求 `D1` 回包；这不代表远端收到数据。
+
+2.0.2 使用维护源码 `Connections/WindowsBluetoothBackend.cs` 替换原来依赖调试运行库的 `BLEDriverCore.dll`。通过微软 Windows SDK 的 .NET 投影调用 Windows GATT/SPP API，支持 FFE0/FFE1 和 Nordic UART 服务；检查服务、可写特征和通知订阅后才标记连接成功。发送按 MTU 分片并等待结果，没有无界发送队列；连接和发送设置等待上限。Windows 可能继续完成底层连接请求，关闭时会取消本地等待并释放持有的对象。Windows 配对生成的蓝牙 COM 端口仍使用独立串口组件。
+
+`Build/PrepareWindowsBluetooth.ps1` 从微软 NuGet 源下载固定版本 `Microsoft.Windows.SDK.NET.Ref 10.0.19041.57` 并验证 SHA256。`Build/ApplyWindowsBluetooth.ps1` 编译维护源码，将主程序与辅助进程的蓝牙 P/Invoke 入口替换为托管调用，同时更新两份依赖清单。脚本可重复执行，检查参数数量和返回类型，保留已有的托管错误转换方法。构建原生主程序前先准备 Windows SDK 依赖。发行包只携带运行 DLL，不携带 SDK 压缩包或旧 BLEDriverCore.dll；不要求使用者安装开发工具。
+
+蓝牙扫描错误通过辅助进程响应传到选择面板。原来的按名称隐藏设备限制已取消，但自动连接仍限定已知设备；首次使用请手动选择。新蓝牙实现已验证加载、Windows 枚举、无效连接恢复、25 次失败/释放循环及设备列表的 Unicode 传递；尚未完成真实 ESP32 收发验证，因此 2.0.2 按测试版提供。最低系统为 Windows 10 2004（19041）。
+
+`Packaging/TestCleanStartup.ps1 -Payload <干净目录> -DeviceConnections` 验证真实程序集的串口/蓝牙选择、默认不连接、错误提示，以及向本机回环 UDP 接收器发送 TCode 后断开。`Tests/WindowsBluetoothRegression.cs` 在没有旧 DLL 的环境运行真实主程序和辅助进程入口。测试副本禁用设备管理线程，不连接物理设备；需允许回环网络。这些检查不等同于 USB/BLE 实机验证。
+
+Windows API 参考：[GATT Client](https://learn.microsoft.com/en-us/windows/apps/develop/devices-sensors/gatt-client)、[RFCOMM Device Service](https://learn.microsoft.com/en-us/uwp/api/windows.devices.bluetooth.rfcomm.rfcommdeviceservice)。
 
 `Build/AddDurationMatchingHook.ps1` 给原生 `LocalScriptRepository.SearchForScripts` 添加候选过滤委托，已集成到重建流程。运行插件在主控制栏初始化时注册过滤器，并重新发起一次当前媒体检索。过滤器未就绪时本地检索返回空结果，避免先按名称输出错误脚本。关闭或热更新时仅注销自己的委托；原生脚本锁定设置仍有效。
 

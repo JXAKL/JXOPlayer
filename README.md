@@ -6,7 +6,9 @@ Windows 桌面播放器联动与脚本控制工具。默认使用 PotPlayer，�
 
 ## 使用
 
-打开 **[版本下载页](https://github.com/JXAKL/JXOPlayer/releases/latest)**，在 Assets 中下载 `JXOPlayer-2.0-Setup.exe` 安装，或下载 `JXOPlayer-2.0-Portable.zip` 完整解压后运行。适用于 Windows 10/11 64 位，自带 .NET 运行环境、PotPlayer 与媒体时长读取组件。GitHub 自动生成的 Source code 是源码，不是可直接运行的软件包。
+打开 **[2.0.2 测试版下载页](https://github.com/JXAKL/JXOPlayer/releases/tag/v2.0.2)**，在 Assets 中下载 `JXOPlayer-2.0.2-Setup.exe` 安装，或下载 `JXOPlayer-2.0.2-Portable.zip` 完整解压后运行。适用于 Windows 10 2004（19041）及以上、Windows 11 64 位，自带 .NET 运行环境、Windows 蓝牙接口组件、PotPlayer 与媒体时长读取组件。GitHub 自动生成的 Source code 是源码，不是可直接运行的软件包。
+
+2.0.2 修复串口筛选和手动 UDP 握手限制，并用 Windows 蓝牙接口替换依赖调试运行库的旧组件。BLE 实现支持 FFE0/FFE1 和 Nordic UART，固件需通过相应服务接收 TCode。已通过 62 项隔离连接与启动检查，尚未完成真实 ESP32 BLE 收发验证，因此以预发布测试版提供。
 
 发行包不携带媒体库、个人设备配置、播放历史或缓存。首次运行需要配置设备、轴范围和脚本/视频目录。音频不进入随机视频库，但支持手动播放匹配脚本。超长路径兼容播放期间需保持 JXOPlayer 运行。
 

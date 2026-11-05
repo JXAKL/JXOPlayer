@@ -17,3 +17,5 @@ Add-Type -Path (Join-Path $PSScriptRoot 'NativeResources.cs')
 [NativeResources]::Apply($exe,(Join-Path $runtime 'JXOPlayer.ico'))
 [NativeResources]::Apply((Join-Path $runtime 'JXOPlayer.dll'),(Join-Path $runtime 'JXOPlayer.ico'))
 & (Join-Path $PSScriptRoot 'BuildPlugin.ps1') -ApplicationDirectory $app
+& (Join-Path $PSScriptRoot 'ApplyWindowsBluetooth.ps1') -ApplicationDirectory $app
+& (Join-Path $PSScriptRoot 'ApplyDeviceConnectionCompatibility.ps1') -ApplicationDirectory $app

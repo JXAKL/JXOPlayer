@@ -1,0 +1,13 @@
+Windows SDK for .NET runtime projections
+Microsoft.Windows.SDK.NET.dll and WinRT.Runtime.dll
+Source package: Microsoft.Windows.SDK.NET.Ref 10.0.19041.57
+Publisher: Microsoft Corporation
+Copyright: Microsoft Corporation. All rights reserved.
+Package: https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref/10.0.19041.57
+License terms supplied by the package: https://aka.ms/WinSDKLicenseURL
+C#/WinRT project and license: https://github.com/microsoft/CsWinRT
+
+These components provide Windows Runtime API projections. The user's machine
+does not need a developer SDK, Visual Studio, or the old debug C++ runtimes.
+Other bundled components retain their existing licenses, including the files
+under the PotPlayer directory. This notice does not replace those terms.

@@ -1,6 +1,9 @@
 param([string]$ApplicationDirectory=(Join-Path $PSScriptRoot '..\JXOPlayer'))
 $ErrorActionPreference='Stop'
 $app=(Resolve-Path -LiteralPath $ApplicationDirectory).Path
+foreach($name in 'JXOPlayer.Bluetooth.dll','Microsoft.Windows.SDK.NET.dll','WinRT.Runtime.dll'){
+    if(!(Test-Path -LiteralPath (Join-Path $app ('Runtime\'+$name)))){throw 'Windows Bluetooth replacement has not been built'}
+}
 $stage=Join-Path $PSScriptRoot ('stage-'+[guid]::NewGuid().ToString('N'))
 $payload=Join-Path $stage 'JXOPlayer'
 New-Item -ItemType Directory -Path $payload | Out-Null
@@ -11,7 +14,7 @@ Copy-Item -LiteralPath (Join-Path $app 'JXOPlayer.exe') -Destination $payload
 # Allow only runtime files, never logs, debug symbols, generated test hosts or settings.
 Get-ChildItem -LiteralPath (Join-Path $app 'Runtime') -File | Where-Object {
     ($_.Extension -in '.dll','.exe','.ico' -or $_.Name -in 'JXOPlayer.deps.json','JXOPlayer.runtimeconfig.json','BtBridge.deps.json','BtBridge.runtimeconfig.json') -and
-    $_.Name -notmatch '^(Test|StartupRegression|PlaybackIntegration|CheckReportedMedia)'
+    $_.Name -notmatch '^(Test|StartupRegression|PlaybackIntegration|CheckReportedMedia)' -and $_.Name -ne 'BLEDriverCore.dll'
 } | Copy-Item -Destination (Join-Path $payload 'Runtime')
 foreach($file in 'FloatingAxisControl.cs','jiaxin.jpg'){Copy-Item -LiteralPath (Join-Path $app "Plugins\$file") -Destination (Join-Path $payload 'Plugins')}
 foreach($file in 'mpv.exe','DurationProbe.lua'){Copy-Item -LiteralPath (Join-Path $app "Bin\$file") -Destination (Join-Path $payload 'Bin')}
@@ -46,8 +49,9 @@ foreach($name in 'Chinese(Simplified).ini','Chinese(Traditional).ini','English.i
 '{"Folders":[],"Relative":true,"AutoAdvance":false}' | Set-Content -LiteralPath (Join-Path $payload 'Data\RandomPlayback.settings.json') -Encoding utf8NoBOM
 '{"AutoStart":true,"Opacity":0.9,"Step":5,"Collapsed":false,"PauseVideo":false}' | Set-Content -LiteralPath (Join-Path $payload 'Plugins\FloatingAxisControl.config.json') -Encoding utf8NoBOM
 "[Settings]`r`nAutoDownloadFile=0`r`nAutoUpdateStart=0`r`nCheckAutoUpdate=0`r`nPlaybackMode=1" | Set-Content -LiteralPath (Join-Path $payload 'PotPlayer\PotPlayerMini64.ini') -Encoding utf8NoBOM
-'JXOPlayer 2.0 clean distribution; build 2026-11-01' | Set-Content -LiteralPath (Join-Path $payload '.clean-distribution') -Encoding utf8NoBOM
+'JXOPlayer 2.0.2 clean distribution; build 2026-11-06' | Set-Content -LiteralPath (Join-Path $payload '.clean-distribution') -Encoding utf8NoBOM
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot '快速开始.txt') -Destination $payload
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ThirdPartyNotices.txt') -Destination $payload
 $manifest=@(Get-ChildItem -LiteralPath $payload -File -Recurse | Sort-Object FullName | ForEach-Object {
     [pscustomobject]@{Path=[IO.Path]::GetRelativePath($payload,$_.FullName);Bytes=$_.Length;SHA256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}
 })
